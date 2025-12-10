@@ -167,7 +167,6 @@
       background-color: #fef2f2;
     }
 
-
     .priority-dot {
       width: 10px;
       height: 10px;
@@ -319,6 +318,113 @@
     .dropdown.show .dropdown-content {
       display: block;
     }
+
+    /* 🔹 Floating Help Button */
+    #helpBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4CAF50, #16a34a);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+      z-index: 10000;
+    }
+
+    #helpBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(22,163,74,0.5);
+    }
+
+    /* 🔹 Help Modal */
+    #helpModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      padding: 16px;
+    }
+
+    #helpModal.open {
+      display: flex;
+    }
+
+    .help-card {
+      background: #ffffff;
+      max-width: 480px;
+      width: 100%;
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .help-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .help-header h2 {
+      font-size: 1.1rem;
+      margin: 0;
+      color: #111827;
+    }
+
+    #helpClose {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 4px 8px;
+    }
+
+    .help-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+
+    .help-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0 0 6px 0;
+    }
+
+    .help-list li {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: #4b5563;
+    }
+
+    .help-list code {
+      background: #f3f4f6;
+      padding: 2px 5px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+    }
+
+    .help-hint {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
@@ -341,6 +447,78 @@
       <input id="manualInput" placeholder="Type a task and press Add" aria-label="Task name" />
       <button type="submit">Add</button>
     </form>
+  </div>
+
+  <!-- 🔹 Floating Help Button -->
+  <button id="helpBtn" aria-label="Show voice command help">?</button>
+
+  <!-- 🔹 Help Modal -->
+  <div id="helpModal" aria-hidden="true">
+    <div class="help-card">
+      <div class="help-header">
+        <h2>Voice Command Cheat-Sheet</h2>
+        <button id="helpClose" aria-label="Close help">&times;</button>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Wake word</div>
+        <ul class="help-list">
+          <li>Say <code>Hey To Do</code> or <code>Hello To Do</code> to start.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Add tasks (with NLP)</div>
+        <ul class="help-list">
+          <li><code>Add buy milk</code></li>
+          <li><code>Remind me to call mom</code></li>
+          <li><code>Add submit HCI report with high priority by Monday in school category</code></li>
+          <li><code>Remind me to pay rent by Friday</code></li>
+        </ul>
+        <p class="help-hint">
+          I’ll try to detect the task name, <b>priority</b>, <b>category</b>, and <b>due date</b> automatically.
+        </p>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Mark / delete tasks by name</div>
+        <ul class="help-list">
+          <li><code>Mark buy milk as done</code></li>
+          <li><code>Delete buy milk</code> or <code>Remove buy milk</code></li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Bulk actions</div>
+        <ul class="help-list">
+          <li><code>Clear completed tasks</code> / <code>Remove completed tasks</code></li>
+          <li><code>Clear all tasks</code> / <code>Delete everything</code></li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Listing tasks</div>
+        <ul class="help-list">
+          <li><code>What are my tasks</code></li>
+          <li><code>List pending tasks</code></li>
+          <li><code>List completed tasks</code></li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <div class="help-section-title">Sorting</div>
+        <ul class="help-list">
+          <li><code>Sort by priority</code></li>
+          <li><code>Sort by category</code></li>
+          <li><code>Sort by due date</code></li>
+          <li><code>Sort by created</code></li>
+        </ul>
+      </div>
+
+      <p class="help-hint">
+        Tip: You can also type in the box below if speaking isn’t convenient.
+      </p>
+    </div>
   </div>
 </body>
 </html>

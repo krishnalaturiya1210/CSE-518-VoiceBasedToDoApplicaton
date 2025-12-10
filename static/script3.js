@@ -16,47 +16,42 @@ let wakeRunning = false;
 let inCommandMode = false;
 let sortMode = "created";
 
-
-
 function attachLongPressDelete(element, taskId) {
   let pressTimer = null;
   let longPressTriggered = false;
 
-  const start = (e) => {
+  const start = () => {
     longPressTriggered = false;
-    // 650ms press = long-press
     pressTimer = setTimeout(() => {
       longPressTriggered = true;
       element.classList.add("task-long-pressed");
       if (confirm("Long press detected. Delete this task?")) {
         deleteTask(taskId);
       }
-      // small delay then remove highlight
       setTimeout(() => {
         element.classList.remove("task-long-pressed");
       }, 300);
     }, 650);
   };
 
-  const cancel = (e) => {
+  const cancel = () => {
     if (pressTimer !== null) {
       clearTimeout(pressTimer);
       pressTimer = null;
     }
   };
 
-  // Touch events (phone)
+  // Touch events
   element.addEventListener("touchstart", start);
   element.addEventListener("touchend", cancel);
   element.addEventListener("touchmove", cancel);
   element.addEventListener("touchcancel", cancel);
 
-  // Mouse events (desktop)
+  // Mouse events
   element.addEventListener("mousedown", start);
   element.addEventListener("mouseup", cancel);
   element.addEventListener("mouseleave", cancel);
 }
-
 
 /* --- Audio cue --- */
 function playDing() {
@@ -82,16 +77,12 @@ function playDing() {
 function speak(text) {
   if (!synth) return;
   console.log("🗣️ Speaking:", text);
-
-  //Important especially on mobile:
-  // Cancel any queued / ongoing speech so we don't stutter.
+  // prevent stutter on mobile
   synth.cancel();
-
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "en-US";
   synth.speak(utter);
 }
-
 
 function showStatus(msg, color = "#333") {
   console.log(`💬 Status: ${msg}`);
@@ -99,7 +90,7 @@ function showStatus(msg, color = "#333") {
   statusText.style.color = color;
 }
 
-/* --- Task List (NEW card layout) --- */
+/* --- Task List (card layout) --- */
 async function refreshTasks() {
   console.log("🎨 Refreshing tasks...");
   try {
@@ -113,7 +104,6 @@ async function refreshTasks() {
       div.className = "task";
       div.dataset.id = t.id;
 
-      // Format due date if present
       let formattedDate = "";
       if (t.due_date) {
         const dueDate = new Date(t.due_date);
@@ -149,19 +139,15 @@ async function refreshTasks() {
         </div>
       `;
 
-      // Checkbox behavior
       const checkbox = div.querySelector("input[type='checkbox']");
       checkbox.addEventListener("change", () => toggleTask(t.id));
 
       const deleteBtn = div.querySelector(".task-delete");
       deleteBtn.addEventListener("click", () => deleteTask(t.id));
 
-      // Attach long-press-to-delete on the whole card
       attachLongPressDelete(div, t.id);
 
       taskList.appendChild(div);
-
-    
     });
   } catch (err) {
     showStatus("Failed to load tasks.", "red");
@@ -264,7 +250,6 @@ async function processCommand(cmd) {
     return;
   }
 
-  // Sorting
   if (lower.includes("sort by priority") || lower.includes("order by priority")) {
     sortMode = "priority";
     speak("Sorting by priority.");
@@ -567,7 +552,7 @@ startWakeRecognition();
 refreshTasks();
 showStatus("Say 'Hey To Do' to start.", "green");
 
-/* --- Overlay + Service Worker on load --- */
+/* --- Overlay + Service Worker + Help modal on load --- */
 window.addEventListener("load", () => {
   console.log("🎉 Page loaded.");
 
@@ -577,6 +562,34 @@ window.addEventListener("load", () => {
       overlay.classList.add("fade-out");
       setTimeout(() => overlay.remove(), 600);
       speak("Voice-based To-Do app ready. Say 'Hey To Do' to start.");
+    });
+  }
+
+  // 🔹 Help button / modal wiring
+  const helpBtn = document.getElementById("helpBtn");
+  const helpModal = document.getElementById("helpModal");
+  const helpClose = document.getElementById("helpClose");
+
+  if (helpBtn && helpModal) {
+    helpBtn.addEventListener("click", () => {
+      helpModal.classList.add("open");
+      helpModal.setAttribute("aria-hidden", "false");
+    });
+  }
+
+  if (helpClose && helpModal) {
+    helpClose.addEventListener("click", () => {
+      helpModal.classList.remove("open");
+      helpModal.setAttribute("aria-hidden", "true");
+    });
+  }
+
+  if (helpModal) {
+    helpModal.addEventListener("click", (e) => {
+      if (e.target === helpModal) {
+        helpModal.classList.remove("open");
+        helpModal.setAttribute("aria-hidden", "true");
+      }
     });
   }
 
