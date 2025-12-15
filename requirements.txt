@@ -13,3 +13,4 @@ dateparser==1.2.0
 
 # For production deployment
 gunicorn==21.2.0
+psycopg2-binary==2.9.9
