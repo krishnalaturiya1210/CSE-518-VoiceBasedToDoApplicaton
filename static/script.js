@@ -94,7 +94,10 @@ function wakeWordHeard(rawTranscript) {
     // Shorter fragments that sometimes appear
     "hey do",
     "hey to",
-    "hey odo"
+    "hey odo",
+
+    "to do",
+    "todooo"
   ];
 
   // Check if any variant appears as a substring
