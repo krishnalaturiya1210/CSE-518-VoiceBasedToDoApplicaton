@@ -45,6 +45,63 @@ let confirmOnConfirm = null;
 let confirmOnCancel = null;
 
 /* -----------------------
+   WAKE WORD FUZZY MATCH
+------------------------ */
+
+/**
+ * Returns true if the transcript sounds like our wake word ("Hey To Do").
+ * Includes common misrecognitions like "hate to do", "hate odo", etc.
+ */
+function wakeWordHeard(rawTranscript) {
+  if (!rawTranscript) return false;
+
+  // Normalize transcript
+  let transcript = rawTranscript
+    .toLowerCase()
+    .replace(/[.,!?]/g, " ")   // remove punctuation
+    .replace(/\s+/g, " ")      // collapse whitespace
+    .trim();
+
+  // Known variants and common mis-hearings
+  const wakeVariants = [
+    // Canonical
+    "hey to do",
+    "hey todo",
+    "hey to-do",
+
+    // Small pronunciation / spacing variations
+    "hey todu",
+    "hey tudu",
+    "hey tutu",
+    "hey tado",
+    "hey two do",
+    "hey 2 do",
+
+    // “Hello” versions
+    "hello to do",
+    "hello todo",
+    "hello to-do",
+
+    // Common ASR mistakes with "hate"
+    "hate to do",
+    "hate todo",
+    "hate to-do",
+    "hate odo",   // explicitly requested
+    "hate odoo",
+    "hate todu",
+    "hate tudu",
+
+    // Shorter fragments that sometimes appear
+    "hey do",
+    "hey to",
+    "hey odo"
+  ];
+
+  // Check if any variant appears as a substring
+  return wakeVariants.some(v => transcript.includes(v));
+}
+
+/* -----------------------
    LONG PRESS DELETE
 ------------------------ */
 /**
@@ -117,17 +174,32 @@ function playDing() {
 
 /**
  * Speaks the given text using the SpeechSynthesis API.
+ * Optional onEnd callback runs after speech finishes.
  */
-function speak(text) {
-  if (!synth) return;
+function speak(text, onEnd) {
+  if (!synth) {
+    if (typeof onEnd === "function") {
+      onEnd();
+    }
+    return;
+  }
   console.log("Speaking:", text);
 
   // Prevent stutter on mobile
   synth.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "en-US";
+
+  if (typeof onEnd === "function") {
+    utter.onend = () => {
+      console.log("Finished speaking:", text);
+      onEnd();
+    };
+  }
+
   synth.speak(utter);
 }
+
 
 /**
  * Updates the status text label in the UI.
@@ -242,6 +314,8 @@ function initConfirmDialog() {
 
 /**
  * Opens the confirmation dialog with optional voice prompt.
+ * Now: starts listening only AFTER TTS finishes, so it doesn't
+ * hear its own "Warning..." speech.
  */
 function openConfirmDialog(message, onConfirm, onCancel, voicePrompt) {
   initConfirmDialog();
@@ -259,22 +333,19 @@ function openConfirmDialog(message, onConfirm, onCancel, voicePrompt) {
     commandRecognition && commandRecognition.stop();
   } catch {}
 
-  // Speak the prompt
-  if (voicePrompt) {
-    speak(voicePrompt);
-  } else {
-    speak(message);
-  }
+  // This will be called AFTER the TTS finishes speaking
+  function startConfirmRecognition() {
+    if (!SpeechRecognition) return;
 
-  // Set up a temporary recognition session listening for "I confirm" / "yes" / "cancel"
-  if (SpeechRecognition) {
     confirmRecognition = new SpeechRecognition();
     confirmRecognition.lang = "en-US";
     confirmRecognition.continuous = false;
     confirmRecognition.interimResults = false;
 
     confirmRecognition.onresult = (e) => {
-      const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
+      const transcript = e.results[e.results.length - 1][0].transcript
+        .toLowerCase()
+        .trim();
       console.log("Confirm dialog heard:", transcript);
 
       if (
@@ -291,7 +362,7 @@ function openConfirmDialog(message, onConfirm, onCancel, voicePrompt) {
       ) {
         handleConfirmCancel(true);
       } else {
-        speak("I did not catch that. Can you repeat?");
+        speak("I did not catch that. Can you repeat?", startConfirmRecognition);
       }
     };
 
@@ -318,7 +389,15 @@ function openConfirmDialog(message, onConfirm, onCancel, voicePrompt) {
       console.warn("Could not start confirmRecognition:", err);
     }
   }
+
+  // Speak the prompt, then start listening
+  if (voicePrompt) {
+    speak(voicePrompt, startConfirmRecognition);
+  } else {
+    speak(message, startConfirmRecognition);
+  }
 }
+
 
 /**
  * Closes the confirmation dialog and restores wake recognition if needed.
@@ -806,12 +885,10 @@ function initRecognizers() {
   commandRecognition.continuous = false;
 
   wakeRecognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript
-      .trim()
-      .toLowerCase();
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
     console.log(`Wake heard: "${transcript}"`);
     if (
-      (transcript.includes("hey to do") || transcript.includes("hello to do")) &&
+      wakeWordHeard(transcript) &&
       !inCommandMode &&
       !inConfirmDialog
     ) {
