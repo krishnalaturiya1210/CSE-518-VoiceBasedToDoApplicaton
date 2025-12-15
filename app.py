@@ -339,7 +339,7 @@ def clear_all():
     return jsonify({"message": "All tasks cleared"})
 
 
-# --- Service worker from /sw.js (controls '/') ---
+# --- Service worker from /sw.js (controls '/') --- 
 @app.route("/sw.js")
 def service_worker():
     """
