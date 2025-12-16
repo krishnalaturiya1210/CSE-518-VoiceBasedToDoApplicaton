@@ -2,8 +2,6 @@
 
 Hey To Do is a browser-based, voice-first to-do list application built for **CSE 518 (Human-Computer Interaction)**. It supports **multimodal interaction** (voice + touch + keyboard), with a **Flask + SQLAlchemy** backend and a **JavaScript/Web Speech API** frontend.
 
-**Live deployment:** https://voicebasedtodoapplication.up.railway.app/
-
 ---
 
 ## Key Features
@@ -120,4 +118,6 @@ If DATABASE_URL is not set, the app falls back to local SQLite (tasks.db). In pr
 Deployment Notes (Railway)
 
 Set DATABASE_URL in your Railway service environment variables (not inside app.py). Railway typically runs the app via Gunicorn/Procfile; locally you can run python app.py.
+
+**Live deployment:** https://voicebasedtodoapplication.up.railway.app/
 
