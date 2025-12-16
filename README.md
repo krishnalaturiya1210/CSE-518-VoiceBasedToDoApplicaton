@@ -10,21 +10,8 @@ and keyboard input, with a Flask backend and a JavaScript-based frontend.
 Repository Structure
 ------------------------------------------------
 
-.
-├── app.py
-├── task_parsing.py
-├── intent_model.joblib
-├── category_model.joblib
-├── requirements.txt
-├── Procfile
-├── static/
-│   ├── script.js
-│   ├── style.css
-│   ├── sw.js
-│   └── icons/
-├── templates/
-│   └── index.html
-└── README.txt
+<img width="227" height="386" alt="image" src="https://github.com/user-attachments/assets/60b2c6a5-57ff-4acd-9f87-354643be6da3" />
+
 
 ------------------------------------------------
 Backend (Flask)
