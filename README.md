@@ -89,10 +89,10 @@ After wake word, try:
 - **“list all tasks”**
 
 ### Sort
-- **“sort by priority”**
-- **“sort by due date”**
-- **“sort by category”**
-- **“sort by created”**
+- **“order by priority”**
+- **“order by due date”**
+- **“order by category”**
+- **“order by created”**
 
 > Tip: Voice features work best in Chrome (Desktop/Android) with microphone permission enabled.
 
